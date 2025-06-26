@@ -5,7 +5,7 @@
 --- 
 Comment System for Websites and Blogs. Ideal for static site generators. Easy to integrate with comment management via Admin Panel.
 
-[![GitHub Repository](https://img.shields.io/badge/GitHub-Subscribe-red?style=flat-square&logo=github)](https://github.com/ruedigerp/comments)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-red?style=flat-square&logo=github)](https://github.com/ruedigerp/comments)
 [![Documentation](https://img.shields.io/badge/Docs-Explore-green?style=flat-square&logo=readthedocs)](https://github.com/ruedigerp/comments/tree/main/docs)
 [![API Docs](https://img.shields.io/badge/API%20Docs-Read-blueviolet?style=flat-square&logo=github)](https://github.com/ruedigerp/comments/tree/main/docs/api)
 
