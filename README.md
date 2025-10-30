@@ -1,8 +1,8 @@
 ## Hi there 👋
 
-[![Blog](https://img.shields.io/badge/Website-Visit-blue?style=flat-square&logo=google-chrome)](https://blog.kuepper.nrw)
+[![Blog: https://blog.kuepper.nrw](https://img.shields.io/badge/Website-Visit-blue?style=flat-square&logo=google-chrome)](https://blog.kuepper.nrw)
 
-![Rüdigers GitHub stats](https://github-readme-stats.vercel.app/api?username=ruedigerp&show_icons=true&theme=transparent)
+![Rüdigers GitHub stats](https://github-readme-stats.vercel.app/api?username=ruedigerp&show_icons=true&theme=merko)
 
 --- 
 Comment System for Websites and Blogs. Ideal for static site generators. Easy to integrate with comment management via Admin Panel.
