@@ -10,7 +10,7 @@ import "fmt"
 // CloudPlatformEngineer repräsentiert einen CloudPlatformEngineer
 type CloudPlatformEngineer struct {
 	Name            string
-  company         string
+	company         string
 	Role            string
 	LanguagesSpoken []string
 }
@@ -23,7 +23,7 @@ func (s CloudPlatformEngineer) SayHi() {
 func main() {
 	me := SoftwareEngineer{
 		Name:            "Rüdiger Küpper",
-    Company:         "mogenius GmbH",
+		Company:         "mogenius GmbH",
 		Role:            "Cloud Platform Engineer",
 		LanguagesSpoken: []string{"de_DE", "en_US"},
 	}
