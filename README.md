@@ -2,6 +2,36 @@
 
 [![Blog: https://blog.kuepper.nrw](https://img.shields.io/badge/Website-Visit-blue?style=flat-square&logo=google-chrome)](https://blog.kuepper.nrw)
 
+```go
+package main
+
+import "fmt"
+
+// CloudPlatformEngineer repräsentiert einen CloudPlatformEngineer
+type CloudPlatformEngineer struct {
+	Name            string
+  company         string
+	Role            string
+	LanguagesSpoken []string
+}
+
+// Rüdiger gibt eine Begrüßungsnachricht aus
+func (s CloudPlatformEngineer) SayHi() {
+	fmt.Println("Thanks for dropping by, hope you find some of my work interesting.")
+}
+
+func main() {
+	me := SoftwareEngineer{
+		Name:            "Rüdiger Küpper",
+    Company:         "mogenius GmbH",
+		Role:            "Cloud Platform Engineer",
+		LanguagesSpoken: []string{"de_DE", "en_US"},
+	}
+
+	me.SayHi()
+}
+```
+
 ![Rüdigers GitHub stats](https://github-readme-stats.vercel.app/api?username=ruedigerp&show_icons=true&theme=merko)
 
 --- 
