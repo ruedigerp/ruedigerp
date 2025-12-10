@@ -32,7 +32,9 @@ func main() {
 }
 ```
 
+<!--
 ![Rüdigers GitHub stats](https://github-readme-stats.vercel.app/api?username=ruedigerp&show_icons=true&theme=merko)
+-->
 
 --- 
 Comment System for Websites and Blogs. Ideal for static site generators. Easy to integrate with comment management via Admin Panel.

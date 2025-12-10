@@ -1,9 +1,11 @@
 name: GitHub Profile Stats
 
 on:
-  schedule:
-    # run everyday at 12:00 UTC
-    - cron: "0 12 * * *"
+  push:
+    branches: [Xmain]
+  # schedule:
+  #   # run everyday at 12:00 UTC
+  #   - cron: "0 12 * * *"
   workflow_dispatch:
 
 permissions:
