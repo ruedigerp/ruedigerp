@@ -103,6 +103,26 @@ runs:
           --data-binary "@${PROV_PATH}" \
           "https://${{ inputs.chartmuseum-url }}/api/prov"
 
+    # - name: Push to OCI registry
+    #   id: oci-push
+    #   shell: bash
+    #   run: |
+    #     set -e
+    #     PACKAGE_PATH="/tmp/${{ inputs.chart-name }}-${{ inputs.version }}.tgz"
+        
+    #     echo "${{ inputs.oci-password }}" | helm registry login ghcr.io --username "${{ inputs.oci-username }}" --password-stdin
+        
+    #     PUSH_OUTPUT=$(helm push "${PACKAGE_PATH}" "oci://${{ inputs.oci-registry }}" 2>&1)
+    #     echo "${PUSH_OUTPUT}"
+        
+    #     CHART_DIGEST=$(echo "${PUSH_OUTPUT}" | grep "Digest: sha256:" | awk '{print $2}')
+    #     if [ -z "${CHART_DIGEST}" ]; then
+    #       echo "::error::Failed to extract chart digest"
+    #       exit 1
+    #     fi
+        
+    #     echo "digest=${CHART_DIGEST}" >> $GITHUB_OUTPUT
+    #     echo "Chart digest: ${CHART_DIGEST}"
     - name: Push to OCI registry
       id: oci-push
       shell: bash
@@ -112,12 +132,20 @@ runs:
         
         echo "${{ inputs.oci-password }}" | helm registry login ghcr.io --username "${{ inputs.oci-username }}" --password-stdin
         
-        PUSH_OUTPUT=$(helm push "${PACKAGE_PATH}" "oci://${{ inputs.oci-registry }}" 2>&1)
+        # Capture output and show it
+        PUSH_OUTPUT=$(helm push "${PACKAGE_PATH}" "oci://${{ inputs.oci-registry }}" 2>&1) || {
+          echo "::error::Helm push failed"
+          echo "${PUSH_OUTPUT}"
+          exit 1
+        }
         echo "${PUSH_OUTPUT}"
         
-        CHART_DIGEST=$(echo "${PUSH_OUTPUT}" | grep "Digest: sha256:" | awk '{print $2}')
+        # Try multiple patterns to extract digest
+        CHART_DIGEST=$(echo "${PUSH_OUTPUT}" | grep -oE 'sha256:[a-f0-9]{64}' | head -1)
+        
         if [ -z "${CHART_DIGEST}" ]; then
-          echo "::error::Failed to extract chart digest"
+          echo "::error::Failed to extract chart digest from output"
+          echo "Push output was: ${PUSH_OUTPUT}"
           exit 1
         fi
         
