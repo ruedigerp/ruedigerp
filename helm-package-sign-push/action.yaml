@@ -65,11 +65,11 @@ runs:
       run: |
         gpg --export-secret-keys > ~/.gnupg/secring.gpg
 
-    - name: Import GPG key
-      uses: crazy-max/ghaction-import-gpg@v6
-      with:
-        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.GPG_PASSPHRASE }}
+    # - name: Import GPG key
+    #   uses: crazy-max/ghaction-import-gpg@v6
+    #   with:
+    #     gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+    #     passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
     - name: Setup Helm
       uses: azure/setup-helm@v4
