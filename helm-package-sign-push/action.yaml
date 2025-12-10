@@ -1,0 +1,146 @@
+# .github/actions/helm-package-sign-push/action.yml
+name: 'Helm Package, Sign & Push'
+description: 'Packages a Helm chart with GPG signing and pushes to ChartMuseum and OCI registry with cosign signing'
+
+inputs:
+  chart-path:
+    description: 'Path to the Helm chart directory'
+    required: true
+  chart-name:
+    description: 'Name of the Helm chart'
+    required: true
+  version:
+    description: 'Version for the chart (both version and appVersion)'
+    required: true
+  gpg-key-name:
+    description: 'Name of the GPG key for Helm signing'
+    required: false
+    default: 'Helm Charts'
+  chartmuseum-url:
+    description: 'ChartMuseum URL (without credentials)'
+    required: false
+    default: ''
+  chartmuseum-user:
+    description: 'ChartMuseum username'
+    required: false
+    default: ''
+  chartmuseum-password:
+    description: 'ChartMuseum password'
+    required: false
+  oci-registry:
+    description: 'OCI registry URL (e.g., ghcr.io/org/helm-charts)'
+    required: true
+  oci-username:
+    description: 'OCI registry username'
+    required: true
+  oci-password:
+    description: 'OCI registry password/token'
+    required: true
+  cosign-sign:
+    description: 'Sign with cosign after OCI push'
+    required: false
+    default: 'true'
+  set-public:
+    description: 'Set package visibility to public (GitHub only)'
+    required: false
+    default: 'false'
+  github-org:
+    description: 'GitHub org for visibility change'
+    required: false
+    default: ''
+
+outputs:
+  chart-digest:
+    description: 'The digest of the pushed OCI chart'
+    value: ${{ steps.oci-push.outputs.digest }}
+  package-path:
+    description: 'Path to the packaged chart'
+    value: ${{ steps.package.outputs.package-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Create GPG keyring for Helm
+      shell: bash
+      run: |
+        gpg --export-secret-keys > ~/.gnupg/secring.gpg
+
+    - name: Package Helm chart with signing
+      id: package
+      shell: bash
+      run: |
+        set -e
+        cd "${{ inputs.chart-path }}"
+        
+        PACKAGE_PATH="/tmp/${{ inputs.chart-name }}-${{ inputs.version }}.tgz"
+        
+        helm package . -d /tmp/ \
+          --version "${{ inputs.version }}" \
+          --app-version "${{ inputs.version }}" \
+          --sign \
+          --key "${{ inputs.gpg-key-name }}" \
+          --keyring ~/.gnupg/secring.gpg
+        
+        echo "package-path=${PACKAGE_PATH}" >> $GITHUB_OUTPUT
+        echo "prov-path=${PACKAGE_PATH}.prov" >> $GITHUB_OUTPUT
+
+    - name: Push to ChartMuseum
+      if: inputs.chartmuseum-url != ''
+      shell: bash
+      run: |
+        set -e
+        PACKAGE_PATH="/tmp/${{ inputs.chart-name }}-${{ inputs.version }}.tgz"
+        PROV_PATH="${PACKAGE_PATH}.prov"
+        
+        echo "Pushing chart to ChartMuseum..."
+        curl -XPOST -L -k --fail-with-body \
+          --data-binary "@${PACKAGE_PATH}" \
+          "https://${{ inputs.chartmuseum-user }}:${{ inputs.chartmuseum-password }}@${{ inputs.chartmuseum-url }}/api/charts"
+        
+        echo "Pushing provenance file..."
+        curl -XPOST -L -k --fail-with-body \
+          -u "${{ inputs.chartmuseum-user }}:${{ inputs.chartmuseum-password }}" \
+          --data-binary "@${PROV_PATH}" \
+          "https://${{ inputs.chartmuseum-url }}/api/prov"
+
+    - name: Push to OCI registry
+      id: oci-push
+      shell: bash
+      run: |
+        set -e
+        PACKAGE_PATH="/tmp/${{ inputs.chart-name }}-${{ inputs.version }}.tgz"
+        
+        echo "${{ inputs.oci-password }}" | helm registry login ghcr.io --username "${{ inputs.oci-username }}" --password-stdin
+        
+        PUSH_OUTPUT=$(helm push "${PACKAGE_PATH}" "oci://${{ inputs.oci-registry }}" 2>&1)
+        echo "${PUSH_OUTPUT}"
+        
+        CHART_DIGEST=$(echo "${PUSH_OUTPUT}" | grep "Digest: sha256:" | awk '{print $2}')
+        if [ -z "${CHART_DIGEST}" ]; then
+          echo "::error::Failed to extract chart digest"
+          exit 1
+        fi
+        
+        echo "digest=${CHART_DIGEST}" >> $GITHUB_OUTPUT
+        echo "Chart digest: ${CHART_DIGEST}"
+
+    - name: Sign with cosign
+      if: inputs.cosign-sign == 'true'
+      shell: bash
+      run: |
+        set -e
+        echo "${{ inputs.oci-password }}" | docker login ghcr.io --username "${{ inputs.oci-username }}" --password-stdin
+        
+        cosign sign --yes "${{ inputs.oci-registry }}/${{ inputs.chart-name }}@${{ steps.oci-push.outputs.digest }}"
+
+    - name: Set package visibility to public
+      if: inputs.set-public == 'true' && inputs.github-org != ''
+      shell: bash
+      run: |
+        PACKAGE_NAME="helm-charts/${{ inputs.chart-name }}"
+        curl -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ inputs.oci-password }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          "https://api.github.com/orgs/${{ inputs.github-org }}/packages/container/${PACKAGE_NAME}/versions" \
+          -d '{"visibility":"public"}'
