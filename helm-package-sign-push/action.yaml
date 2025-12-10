@@ -127,7 +127,7 @@ runs:
       id: oci-push
       shell: bash
       run: |
-        set -e
+        # set -e
         PACKAGE_PATH="/tmp/${{ inputs.chart-name }}-${{ inputs.version }}.tgz"
         
         echo "${{ inputs.oci-password }}" | helm registry login ghcr.io --username "${{ inputs.oci-username }}" --password-stdin
