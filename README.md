@@ -7,8 +7,8 @@ package main
 
 import "fmt"
 
-// CloudPlatformEngineer repräsentiert einen CloudPlatformEngineer
-type CloudPlatformEngineer struct {
+// LinuxSystemsEngineer repräsentiert einen LinuxSystemsEngineer
+type LinuxSystemsEngineer struct {
 	Name            string
 	company         string
 	Role            string
@@ -16,15 +16,15 @@ type CloudPlatformEngineer struct {
 }
 
 // Rüdiger gibt eine Begrüßungsnachricht aus
-func (s CloudPlatformEngineer) SayHi() {
+func (s LinuxSystemsEngineer) SayHi() {
 	fmt.Println("Thanks for dropping by, hope you find some of my work interesting.")
 }
 
 func main() {
 	me := SoftwareEngineer{
 		Name:            "Rüdiger Küpper",
-		Company:         "mogenius GmbH",
-		Role:            "Cloud Platform Engineer",
+		Company:         "Dogado GmbH",
+		Role:            "Linux Systems Engineer",
 		LanguagesSpoken: []string{"de_DE", "en_US"},
 	}
 
